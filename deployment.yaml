@@ -29,9 +29,9 @@ spec:
         securityContext:
           allowPrivilegeEscalation: false
         resources:
-          # requests:
-          #   cpu: 50m
-          #   memory: 50Mi
-          # limits:
-          #   cpu: 50m
-          #   memory: 50Mi
+          requests:
+            cpu: 50m
+            memory: 50Mi
+          limits:
+            cpu: 50m
+            memory: 50Mi
