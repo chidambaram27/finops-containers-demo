@@ -40,6 +40,6 @@ jobs:
     - name: conftest
       uses: YubicoLabs/action-conftest@v3
       with:
-        files: "*.yaml"
+        files: deployment.yaml service.yaml
         gh-token: ${{ secrets.GITHUB_TOKEN }}
         gh-comment-url: ${{ github.event.pull_request.comments_url }}
