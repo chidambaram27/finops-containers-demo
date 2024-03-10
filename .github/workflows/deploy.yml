@@ -1,0 +1,39 @@
+name: Deploy to EKS
+
+on:
+  push:
+    branches:
+      - main  # Trigger on pushes to the main branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      # Checkout your repository code
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+        aws-region: "us-east-1"
+        # Replace YOUR_AWS_REGION with your AWS region, e.g., us-east-1
+
+    - name: Install kubectl
+      run: |
+        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+        chmod +x ./kubectl
+        sudo mv ./kubectl /usr/local/bin
+
+    - name: Update kubeconfig
+      run: |
+        aws eks --region us-east-1 update-kubeconfig --name ck-cluster
+        # Replace YOUR_AWS_REGION with your AWS region and YOUR_CLUSTER_NAME with your EKS cluster name
+
+    - name: Deploy to EKS
+      run: |
+        kubectl cluster-info
+        # Replace deployment.yaml with the path to your Kubernetes deployment file
+
