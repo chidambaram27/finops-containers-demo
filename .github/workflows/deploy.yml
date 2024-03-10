@@ -49,6 +49,8 @@ jobs:
       run: conftest test -o github *.yaml > conftest_output
 
     - name: Comment PR
+      # This ensures the step runs regardless of previous step results
+      if: always()  
       uses: thollander/actions-comment-pull-request@v2
       with:
         filePath: ./conftest_output
