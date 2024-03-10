@@ -2,9 +2,8 @@ package main
 
 import data.kubernetes
 
-name := input.metadata.name
-
 deny[msg] {
+	name := input.metadata.name
 	kubernetes.is_deployment
 	not input.spec.template.spec.securityContext.runAsNonRoot
 

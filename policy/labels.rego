@@ -2,8 +2,6 @@ package main
 
 import data.kubernetes
 
-name := input.metadata.name
-
 required_deployment_labels := {
       "app.kubernetes.io/name",
       "app.kubernetes.io/instance",
@@ -22,7 +20,8 @@ find_missing_labels(labels) = missing {
 
 deny[msg] {
 	kubernetes.is_deployment
-	
+      
+      name := input.metadata.name
       labels := input.metadata.labels
       missing_labels := find_missing_labels(labels)
       
