@@ -32,10 +32,10 @@ jobs:
         aws eks --region us-east-1 update-kubeconfig --name ck-cluster
         # Replace YOUR_AWS_REGION with your AWS region and YOUR_CLUSTER_NAME with your EKS cluster name
 
-    - name: Deploy to EKS
-      run: |
-        kubectl cluster-info
-        # Replace deployment.yaml with the path to your Kubernetes deployment file
+    # - name: cluster-info
+    #   run: |
+    #     kubectl cluster-info
+    #     # Replace deployment.yaml with the path to your Kubernetes deployment file
 
     - name: conftest
       uses: YubicoLabs/action-conftest@v3
