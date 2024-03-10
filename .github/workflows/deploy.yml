@@ -1,9 +1,8 @@
 name: Deploy to EKS
 
 on:
-  push:
-    branches:
-      - main  # Trigger on pushes to the main branch
+  pull_request:
+    branches: [ "main" ]  # Trigger on pull request to the main branch
 
 jobs:
   deploy:
@@ -21,11 +20,19 @@ jobs:
         aws-region: "us-east-1"
         # Replace YOUR_AWS_REGION with your AWS region, e.g., us-east-1
 
-    - name: Install kubectl
+    - name: Install Dependencies
       run: |
+        # kubectl install
         curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
         chmod +x ./kubectl
         sudo mv ./kubectl /usr/local/bin
+        # conftest install
+        LATEST_VERSION=$(wget -O - "https://api.github.com/repos/open-policy-agent/conftest/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/' | cut -c 2-)
+        ARCH=$(arch)
+        SYSTEM=$(uname)
+        wget "https://github.com/open-policy-agent/conftest/releases/download/v${LATEST_VERSION}/conftest_${LATEST_VERSION}_${SYSTEM}_${ARCH}.tar.gz"
+        tar xzf conftest_${LATEST_VERSION}_${SYSTEM}_${ARCH}.tar.gz
+        sudo mv conftest /usr/local/bin
 
     - name: Update kubeconfig
       run: |
@@ -37,3 +44,6 @@ jobs:
         kubectl cluster-info
         # Replace deployment.yaml with the path to your Kubernetes deployment file
 
+    - name: Run Conftest Test
+      id: conftest
+      run: ./conftest test -o github *.yaml
