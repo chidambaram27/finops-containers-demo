@@ -46,4 +46,4 @@ jobs:
 
     - name: Run Conftest Test
       id: conftest
-      run: ./conftest test -o github *.yaml
+      run: conftest test -o github *.yaml
