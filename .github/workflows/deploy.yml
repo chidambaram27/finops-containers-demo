@@ -26,13 +26,6 @@ jobs:
         curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
         chmod +x ./kubectl
         sudo mv ./kubectl /usr/local/bin
-        # conftest install
-        LATEST_VERSION=$(wget -O - "https://api.github.com/repos/open-policy-agent/conftest/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/' | cut -c 2-)
-        ARCH=$(arch)
-        SYSTEM=$(uname)
-        wget "https://github.com/open-policy-agent/conftest/releases/download/v${LATEST_VERSION}/conftest_${LATEST_VERSION}_${SYSTEM}_${ARCH}.tar.gz"
-        tar xzf conftest_${LATEST_VERSION}_${SYSTEM}_${ARCH}.tar.gz
-        sudo mv conftest /usr/local/bin
 
     - name: Update kubeconfig
       run: |
@@ -44,6 +37,9 @@ jobs:
         kubectl cluster-info
         # Replace deployment.yaml with the path to your Kubernetes deployment file
 
-    - name: Run Conftest Test
-      id: conftest
-      run: conftest test -o github *.yaml
+    - name: conftest
+      uses: YubicoLabs/action-conftest@v3
+      with:
+        files: "*.yaml"
+        gh-token: ${{ secrets.GITHUB_TOKEN }}
+        gh-comment-url: ${{ github.event.pull_request.comments_url }}
