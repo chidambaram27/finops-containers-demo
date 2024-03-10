@@ -27,10 +27,10 @@ jobs:
         chmod +x ./kubectl
         sudo mv ./kubectl /usr/local/bin
 
-    - name: Update kubeconfig
-      run: |
-        aws eks --region us-east-1 update-kubeconfig --name ck-cluster
-        # Replace YOUR_AWS_REGION with your AWS region and YOUR_CLUSTER_NAME with your EKS cluster name
+    # - name: Update kubeconfig
+    #   run: |
+    #     aws eks --region us-east-1 update-kubeconfig --name ck-cluster
+    #     # Replace YOUR_AWS_REGION with your AWS region and YOUR_CLUSTER_NAME with your EKS cluster name
 
     # - name: cluster-info
     #   run: |
