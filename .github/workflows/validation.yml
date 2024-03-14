@@ -39,10 +39,9 @@ jobs:
     - name: Run Conftest Test
       id: conftest
       run: |
-        echo 'var<<EOF' >> $GITHUB_OUTPUT
-        conftest test ./app-1/*.yaml --parser yaml >> $GITHUB_OUTPUT
-        echo 'EOF' >> $GITHUB_OUTPUT
-        conftest test -o github ./app-1/*.yaml
+        result=$(conftest test ./app-1/*.yaml --parser yaml) 
+        echo CONFTEST_RESULT=$result >> $GITHUB_OUTPUT
+        conftest test -o github ./app-1/*.yaml >> $GITHUB_STEP_SUMMARY
 
     - name: Run prediction
       id: prediction
@@ -68,7 +67,7 @@ jobs:
           ( please check logs for more information )
 
           ```
-          ${{ steps.conftest.outputs.* }}
+          ${{ steps.conftest.outputs.CONFTEST_RESULT }}
           ```
 
           ## Kubecost's total cost prediction for K8s YAML Manifests in this PR
