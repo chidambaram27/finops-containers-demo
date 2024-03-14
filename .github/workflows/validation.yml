@@ -46,7 +46,7 @@ jobs:
 
         # Sanitize the output for GitHub Actions if necessary
         # Replace newlines with \n, and commas with \,
-        SANITIZED_RESULT=$(echo "$CLEANED_RESULT" | sed ':a;N;$!ba;s/\n/\\n/g' | sed 's/,/\\,/g')
+        SANITIZED_RESULT=$(echo "$CLEANED_RESULT" | sed ':a;N;$!ba;s/\n/\\n/g')
 
         # Set the output using GitHub Actions syntax
         echo "conftest_result<<EOF" >> $GITHUB_ENV
