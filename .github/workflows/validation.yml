@@ -39,8 +39,7 @@ jobs:
     - name: Run Conftest Test
       id: conftest
       run: |
-        result=$(conftest test ./app-1/*.yaml --parser yaml) 
-        echo CONFTEST_RESULT=$result >> $GITHUB_OUTPUT
+        echo "CONFTEST_RESULT=$(conftest test ./app-1/*.yaml --parser yaml)" >> $GITHUB_OUTPUT
         conftest test -o github ./app-1/*.yaml >> $GITHUB_STEP_SUMMARY
 
     - name: Run prediction
