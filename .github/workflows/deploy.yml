@@ -69,9 +69,9 @@ jobs:
           
           ## Kubecost's total cost prediction for K8s YAML Manifests in this PR
 
-          \```
+          ```
           ${{ steps.prediction.outputs.PREDICTION_TABLE }}
-          \```
+          ```
 
   deploy:
     runs-on: ubuntu-latest
@@ -95,4 +95,5 @@ jobs:
     - name: Deploy to EKS
       run: |
         kubectl cluster-info
-        # Replace deployment.yaml with the path to your Kubernetes deployment file
+        kubectl apply -f ./app-1 -n demo
+        
