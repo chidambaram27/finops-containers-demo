@@ -56,3 +56,29 @@ jobs:
       uses: thollander/actions-comment-pull-request@v2
       with:
         filePath: ./conftest_output
+
+    - name: Run prediction
+      id: prediction
+      uses: kubecost/cost-prediction-action@v0.1.1
+      with:
+        # Set this to the path containing your YAML specs. It can be a single
+        # YAML file or a directory. The Action will recursively search if this
+        # is a directory and process all .yaml/.yml files it finds.
+        path: ./deployment.yaml
+
+    # Write/update a comment with the prediction results.
+    - name: Update PR with prediction results
+      uses: edumserrano/find-create-or-update-comment@v1
+      with:
+        issue-number: ${{ github.event.pull_request.number }}
+        body-includes: '<!-- kubecost-prediction-results -->'
+        comment-author: 'github-actions[bot]'
+        edit-mode: replace
+        body: |
+          <!-- kubecost-prediction-results -->
+          
+          ## Kubecost's total cost prediction for K8s YAML Manifests in this PR
+
+          \```
+          ${{ steps.prediction.outputs.PREDICTION_TABLE }}
+          \```
