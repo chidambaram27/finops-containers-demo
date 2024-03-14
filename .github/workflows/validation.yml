@@ -39,7 +39,9 @@ jobs:
     - name: Run Conftest Test
       id: conftest
       run: |
-        conftest test ./app-1/*.yaml --parser yaml > $GITHUB_OUTPUT
+        echo 'var<<EOF' >> $GITHUB_OUTPUT
+        conftest test ./app-1/*.yaml --parser yaml >> $GITHUB_OUTPUT
+        echo 'EOF' >> $GITHUB_OUTPUT
         conftest test -o github ./app-1/*.yaml
 
     - name: Run prediction
