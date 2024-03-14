@@ -54,7 +54,7 @@ jobs:
         # Set this to the path containing your YAML specs. It can be a single
         # YAML file or a directory. The Action will recursively search if this
         # is a directory and process all .yaml/.yml files it finds.
-        path: ./app-1
+        path: ./app-1/
 
     # Write/update a comment with the prediction results.
     - name: Update PR with prediction results
