@@ -38,14 +38,9 @@ jobs:
 
     - name: Run Conftest Test
       id: conftest
-      run: conftest test -o github ./app-1/*.yaml > conftest_output
-
-    - name: Comment PR
-      # This ensures the step runs regardless of previous step results
-      if: always()  
-      uses: thollander/actions-comment-pull-request@v2
-      with:
-        filePath: ./conftest_output
+      run: |
+        conftest test -o github ./app-1/*.yaml > $GITHUB_OUTPUT
+        conftest test -o github ./app-1/*.yaml -o github
 
     - name: Run prediction
       id: prediction
@@ -65,11 +60,17 @@ jobs:
         comment-author: 'github-actions[bot]'
         edit-mode: replace
         body: |
-          <!-- kubecost-prediction-results -->
+          <!-- Manifest validation & KubeCost prediction Results -->
           
+          ## Conftest results
+          ( please check logs for more information )
+
+          ```
+          ${{ steps.conftest.outputs.* }}
+          ```
+
           ## Kubecost's total cost prediction for K8s YAML Manifests in this PR
 
           ```
           ${{ steps.prediction.outputs.PREDICTION_TABLE }}
           ```
-        
