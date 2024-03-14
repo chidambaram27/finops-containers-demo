@@ -50,7 +50,7 @@ jobs:
 
         # Set the output using GitHub Actions syntax
         echo "conftest_result<<EOF" >> $GITHUB_ENV
-        echo "$SANITIZED_RESULT" >> $GITHUB_ENV
+        echo -e "$SANITIZED_RESULT" >> $GITHUB_ENV
         echo "EOF" >> $GITHUB_ENV
 
         conftest test -o github ./app-1/*.yaml >> $GITHUB_STEP_SUMMARY
