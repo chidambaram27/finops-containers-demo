@@ -39,8 +39,8 @@ jobs:
     - name: Run Conftest Test
       id: conftest
       run: |
-        conftest test -o github ./app-1/*.yaml > $GITHUB_OUTPUT
-        conftest test -o github ./app-1/*.yaml -o github
+        conftest test ./app-1/*.yaml --parser yaml > $GITHUB_OUTPUT
+        conftest test -o github ./app-1/*.yaml
 
     - name: Run prediction
       id: prediction
