@@ -1,0 +1,89 @@
+name: PR Validation
+
+on:
+  pull_request:
+    branches: [ "main" ]  # Trigger on pull request to the main branch
+
+jobs:
+  validation:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+    - uses: actions/checkout@v2
+      # Checkout your repository code
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+        aws-region: "us-east-1"
+        # Replace YOUR_AWS_REGION with your AWS region, e.g., us-east-1
+
+    - name: Install Dependencies
+      run: |
+        # kubectl install
+        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+        chmod +x ./kubectl
+        sudo mv ./kubectl /usr/local/bin
+        # conftest install
+        LATEST_VERSION=$(wget -O - "https://api.github.com/repos/open-policy-agent/conftest/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/' | cut -c 2-)
+        ARCH=$(arch)
+        SYSTEM=$(uname)
+        wget "https://github.com/open-policy-agent/conftest/releases/download/v${LATEST_VERSION}/conftest_${LATEST_VERSION}_${SYSTEM}_${ARCH}.tar.gz"
+        tar xzf conftest_${LATEST_VERSION}_${SYSTEM}_${ARCH}.tar.gz
+        sudo mv conftest /usr/local/bin
+
+    - name: Run Conftest Test
+      id: conftest
+      run: |
+        CONFTEST_RESULT=$(conftest test ./app-1/*.yaml --parser yaml)
+
+        # Remove ANSI escape sequences
+        CLEANED_RESULT=$(echo "$CONFTEST_RESULT" | sed 's/\x1b\[[0-9;]*m//g')
+
+        # Sanitize the output for GitHub Actions if necessary
+        # Replace newlines with \n, and commas with \,
+        SANITIZED_RESULT=$(echo "$CLEANED_RESULT" | sed ':a;N;$!ba;s/\n/\\n/g')
+
+        # Set the output using GitHub Actions syntax
+        echo "conftest_result<<EOF" >> $GITHUB_ENV
+        echo -e "$SANITIZED_RESULT" >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
+
+        conftest test -o github ./app-1/*.yaml >> $GITHUB_STEP_SUMMARY
+
+    - name: Run prediction
+      id: prediction
+      uses: kubecost/cost-prediction-action@v0.1.1
+      with:
+        # Set this to the path containing your YAML specs. It can be a single
+        # YAML file or a directory. The Action will recursively search if this
+        # is a directory and process all .yaml/.yml files it finds.
+        path: ./app-1/
+
+    # Write/update a comment with the prediction results.
+    - name: Update PR with prediction results
+      uses: edumserrano/find-create-or-update-comment@v1
+      with:
+        issue-number: ${{ github.event.pull_request.number }}
+        body-includes: '<!-- kubecost-prediction-results -->'
+        comment-author: 'github-actions[bot]'
+        edit-mode: replace
+        body: |
+          <!-- Manifest validation & KubeCost prediction Results -->
+          
+          ## Conftest results
+          ( please check logs for more information )
+
+          ```
+          ${{ env.conftest_result }}
+          ```
+
+          ## Kubecost's total cost prediction for K8s YAML Manifests in this PR
+
+          ```
+          ${{ steps.prediction.outputs.PREDICTION_TABLE }}
+          ```
