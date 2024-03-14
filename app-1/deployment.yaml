@@ -19,8 +19,8 @@ spec:
       labels:
         app: hello-kubernetes
     spec:
-      securityContext:
-        runAsNonRoot: true
+      # securityContext:
+      #   runAsNonRoot: true
       containers:
       - name: hello-kubernetes
         image: paulbouwer/hello-kubernetes:1.5
