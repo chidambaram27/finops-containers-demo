@@ -39,7 +39,17 @@ jobs:
     - name: Run Conftest Test
       id: conftest
       run: |
-        echo "CONFTEST_RESULT=$(conftest test ./app-1/*.yaml --parser yaml)" >> $GITHUB_OUTPUT
+        CONFTEST_RESULT=$(conftest test ./app-1/*.yaml --parser yaml)
+
+        # Sanitize the output for GitHub Actions
+        # Replace newlines with \n, and commas with \,
+        SANITIZED_RESULT=$(echo "$CONFTEST_RESULT" | sed ':a;N;$!ba;s/\n/\\n/g' | sed 's/,/\\,/g')
+
+        # Set the output using GitHub Actions syntax
+        echo "conftest_result<<EOF" >> $GITHUB_ENV
+        echo "$SANITIZED_RESULT" >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
+
         conftest test -o github ./app-1/*.yaml >> $GITHUB_STEP_SUMMARY
 
     - name: Run prediction
@@ -66,7 +76,7 @@ jobs:
           ( please check logs for more information )
 
           ```
-          ${{ steps.conftest.outputs.CONFTEST_RESULT }}
+          ${{ env.conftest_result }}
           ```
 
           ## Kubecost's total cost prediction for K8s YAML Manifests in this PR
