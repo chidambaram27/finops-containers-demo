@@ -64,6 +64,22 @@ jobs:
         # is a directory and process all .yaml/.yml files it finds.
         path: ./app-1/
 
+    - name: Container Resizing
+      id: resize
+      run: |
+        export KUBECOST_ADDRESS=http://k8s-kubecost-kubecost-4b9d372b57-124271469.us-east-1.elb.amazonaws.com/model
+
+        RESIZE_RESPONSE=$(curl -G \
+        -d 'window=lastweek' \
+        --data-urlencode 'filter=namespace:"default"+container:"nginx"' \
+          ${KUBECOST_ADDRESS}/savings/requestSizingV2 | jq -r \
+          '(["Pod Name", "Max CPU usage", "CPU request", "CPU recommd", "Max RAM usage", "RAM request", "RAM recommd", "Savings"], (.Recommendations[] | [.controllerName, .maxUsage.cpu, .latestKnownRequest.cpu, .recommendedRequest.cpu, .maxUsage.memory, .latestKnownRequest.memory, .recommendedRequest.memory, .monthlySavings.total | tostring] )) | @tsv' | column -t -s $'\t')
+
+        # Set the output using GitHub Actions syntax
+        echo "resize_result<<EOF" >> $GITHUB_ENV
+        echo -e "$RESIZE_RESPONSE" >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
+
     # Write/update a comment with the prediction results.
     - name: Update PR with prediction results
       uses: edumserrano/find-create-or-update-comment@v1
@@ -80,6 +96,12 @@ jobs:
 
           ```
           ${{ env.conftest_result }}
+          ```
+
+          ## Container Resize Recommendations
+
+          ```
+          ${{ env.resize_result }}
           ```
 
           ## Kubecost's total cost prediction for K8s YAML Manifests in this PR
